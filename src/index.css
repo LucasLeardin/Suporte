@@ -1,0 +1,90 @@
+/* Reset global e configurações base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Prevenir scroll horizontal desnecessário */
+html {
+  overflow-x: hidden;
+}
+
+/* Estilos para inputs em geral */
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Remover estilos padrão dos inputs */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+}
+
+/* Garantir que buttons herdem a fonte */
+button {
+  font-family: inherit;
+}
+
+/* Estilo personalizado para scrollbar - apenas no container principal */
+.scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: #28a745;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #218838;
+}
+
+/* Para Firefox - apenas no container principal */
+.scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: #28a745 #f1f1f1;
+}
+
+/* Indicador de scroll - sombra quando há conteúdo para rolar - apenas no container principal */
+.scroll-container {
+  position: relative;
+  scroll-padding-top: 20px;
+}
+
+.scroll-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 20px;
+  background: linear-gradient(transparent, rgba(40, 167, 69, 0.1));
+  pointer-events: none;
+  border-radius: 0 0 15px 15px;
+}

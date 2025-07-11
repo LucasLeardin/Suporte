@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { authenticatedFetch } from './utils/auth';
+
+import { authenticatedFetch } from '../../utils/auth';
 
 const GroupChat = () => {
   const [groups, setGroups] = useState([]);

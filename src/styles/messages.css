@@ -1,0 +1,152 @@
+/* =======================================================
+   ESTILOS PARA O BOTÃO DE SCROLL NAS MENSAGENS WHATSAPP
+   ======================================================= */
+
+/* Estilos principais do botão de scroll */
+.scroll-button {
+  position: fixed !important;
+  bottom: 120px !important;
+  left: 50% !important;
+  margin-left: 190px !important; /* Metade da largura da lista (380px / 2) para centralizar na área do chat */
+  z-index: 1000 !important;
+  box-sizing: border-box !important;
+  background: linear-gradient(135deg, #00b894, #00a085) !important;
+  color: white !important;
+}
+
+.scroll-button:hover {
+  transform: scale(1.1) translateY(-2px) !important;
+  background: linear-gradient(135deg, #00a085, #008f72) !important;
+  color: white !important;
+}
+
+.scroll-button:active {
+  transform: scale(0.95) !important;
+  background: linear-gradient(135deg, #00b894, #00a085) !important;
+  color: white !important;
+}
+
+/* Garantir que as cores verdes sejam sempre aplicadas */
+.scroll-button,
+.scroll-button:before,
+.scroll-button:after {
+  background: linear-gradient(135deg, #00b894, #00a085) !important;
+  color: white !important;
+}
+
+.scroll-button:focus,
+.scroll-button:visited,
+.scroll-button:link {
+  background: linear-gradient(135deg, #00b894, #00a085) !important;
+  color: white !important;
+}
+
+/* Prevenir que outros estilos sobrescrevam as cores */
+button.scroll-button {
+  background: linear-gradient(135deg, #00b894, #00a085) !important;
+  color: white !important;
+}
+
+button.scroll-button:hover {
+  background: linear-gradient(135deg, #00a085, #008f72) !important;
+  color: white !important;
+}
+
+/* Responsividade para tablets */
+@media (max-width: 768px) {
+  .scroll-button {
+    bottom: 100px !important;
+    left: 50% !important;
+    margin-left: 90px !important; /* Ajuste para tablets */
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 20px !important;
+    background: linear-gradient(135deg, #00b894, #00a085) !important;
+  }
+
+  .scroll-button:hover {
+    background: linear-gradient(135deg, #00a085, #008f72) !important;
+  }
+}
+
+/* Responsividade para celulares */
+@media (max-width: 480px) {
+  .scroll-button {
+    bottom: 90px !important;
+    left: 50% !important;
+    margin-left: 0px !important; /* Centralizar na tela inteira em celulares */
+    transform: translateX(-50%) !important; /* Usar transform para centralizar em telas pequenas */
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 18px !important;
+  }
+  
+  .scroll-button:hover {
+    transform: translateX(-50%) scale(1.1) translateY(-2px) !important;
+  }
+  
+  .scroll-button:active {
+    transform: translateX(-50%) scale(0.95) !important;
+  }
+}
+
+/* Ajustes para diferentes tamanhos de tela */
+@media (max-width: 1024px) {
+  .scroll-button {
+    bottom: 110px !important;
+    margin-left: 150px !important; /* Ajuste para telas médias */
+    background: linear-gradient(135deg, #00b894, #00a085) !important;
+  }
+
+  .scroll-button:hover {
+    background: linear-gradient(135deg, #00a085, #008f72) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .scroll-button {
+    bottom: 95px !important;
+    margin-left: 50px !important; /* Ajuste para telas pequenas */
+    background: linear-gradient(135deg, #00b894, #00a085) !important;
+  }
+
+  .scroll-button:hover {
+    background: linear-gradient(135deg, #00a085, #008f72) !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .scroll-button {
+    bottom: 85px !important;
+    left: 50% !important;
+    margin-left: 0px !important; /* Centralizar na tela inteira */
+    transform: translateX(-50%) !important;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 16px !important;
+  }
+  
+  .scroll-button:hover {
+    transform: translateX(-50%) scale(1.1) translateY(-2px) !important;
+  }
+  
+  .scroll-button:active {
+    transform: translateX(-50%) scale(0.95) !important;
+  }
+}
+
+/* Forçar cores em elementos que podem ficar brancos */
+.whatsapp-conversations-list .conversation-item:hover {
+  background-color: rgba(0, 184, 148, 0.05) !important;
+}
+
+/* Garantir que badges e indicadores mantenham a cor verde */
+.conversation-badge {
+  background-color: #00b894 !important;
+  color: white !important;
+}
+
+/* Prevenir mudanças de cor em elementos dinâmicos */
+[style*="background"] .scroll-button {
+  background: linear-gradient(135deg, #00b894, #00a085) !important;
+}

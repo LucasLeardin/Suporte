@@ -26,10 +26,9 @@
     -->
     <title>React App</title>
     <style>
-      /* Remove TODOS os scrollbars */
+      /* RESET COMPLETO DE SCROLLBARS */
       * {
         box-sizing: border-box;
-        overflow-x: hidden !important;
       }
       
       *::-webkit-scrollbar {
@@ -43,12 +42,62 @@
         scrollbar-width: none !important;
       }
       
-      .hide-scrollbar::-webkit-scrollbar {
-        display: none;
+      /* SCROLLBAR ESPECÍFICO PARA CHAT E MENSAGENS WHATSAPP */
+      #messages-container, 
+      .whatsapp-conversations-list,
+      .whatsapp-messages-area {
+        overflow-y: scroll !important;
+        overflow-x: hidden !important;
+        scrollbar-width: thin !important;
+        scrollbar-color: rgba(135, 206, 235, 0.7) #f8f9fa !important; /* Azul claro com 70% transparência */
       }
-      .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+      
+      #messages-container::-webkit-scrollbar,
+      .whatsapp-conversations-list::-webkit-scrollbar,
+      .whatsapp-messages-area::-webkit-scrollbar {
+        display: block !important;
+        width: 16px !important;
+        background: #f8f9fa !important;
+      }
+      
+      #messages-container::-webkit-scrollbar-track,
+      .whatsapp-conversations-list::-webkit-scrollbar-track,
+      .whatsapp-messages-area::-webkit-scrollbar-track {
+        background: #f8f9fa !important;
+        border-radius: 8px !important;
+      }
+      
+      #messages-container::-webkit-scrollbar-thumb,
+      .whatsapp-conversations-list::-webkit-scrollbar-thumb,
+      .whatsapp-messages-area::-webkit-scrollbar-thumb {
+        background: rgba(135, 206, 235, 0.7) !important; /* Azul claro com 70% transparência */
+        border-radius: 8px !important;
+        border: 2px solid #f8f9fa !important;
+        min-height: 40px !important;
+      }
+      
+      #messages-container::-webkit-scrollbar-thumb:hover,
+      .whatsapp-conversations-list::-webkit-scrollbar-thumb:hover,
+      .whatsapp-messages-area::-webkit-scrollbar-thumb:hover {
+        background: rgba(79, 195, 247, 0.8) !important; /* Azul hover com 80% transparência */
+      }
+      
+      #messages-container::-webkit-scrollbar-thumb:active,
+      .whatsapp-conversations-list::-webkit-scrollbar-thumb:active,
+      .whatsapp-messages-area::-webkit-scrollbar-thumb:active {
+        background: rgba(41, 182, 246, 0.9) !important; /* Azul ativo com 90% transparência */
+      }
+      
+      /* Animação para o botão de scroll para baixo */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px) scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
       }
       
       /* Remove scroll da página principal */

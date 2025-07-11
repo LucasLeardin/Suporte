@@ -14,11 +14,16 @@ const ChatArea = ({
   currentUsername 
 }) => {
   const messagesEndRef = useRef(null);
-  const [lastReadTimestamp, setLastReadTimestamp] = useState(null);
-  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const scrollToBottom = (force = false) => {
-    console.log('📜 [SCROLL] Iniciando scroll para baixo...', { force });
+    // Apenas fazer scroll se explicitamente forçado (troca de chat)
+    if (!force) {
+      console.log('📜 [SCROLL] Scroll não forçado, ignorando');
+      return;
+    }
+
+    console.log('📜 [SCROLL] Scroll inicial para novo chat');
     
     const container = document.getElementById('messages-container');
     if (!container) {
@@ -31,58 +36,29 @@ const ChatArea = ({
       requestAnimationFrame(() => {
         const maxScroll = container.scrollHeight - container.clientHeight;
         
-        console.log('📜 [SCROLL] Estado do container:', {
-          scrollHeight: container.scrollHeight,
-          clientHeight: container.clientHeight,
-          currentScroll: container.scrollTop,
-          maxScroll: maxScroll,
-          hasContent: container.scrollHeight > container.clientHeight
-        });
-        
         if (container.scrollHeight <= container.clientHeight) {
           console.log('📜 [SCROLL] ⚠️ Container sem conteúdo suficiente para scroll');
           return;
         }
         
-        // Método 1: Scroll direto
+        // Scroll direto para o final
         container.scrollTop = maxScroll;
-        
-        // Verificar se funcionou
-        setTimeout(() => {
-          const isAtBottom = Math.abs(container.scrollTop - maxScroll) < 5;
-          console.log('📜 [SCROLL] Resultado:', {
-            targetScroll: maxScroll,
-            actualScroll: container.scrollTop,
-            isAtBottom: isAtBottom
-          });
-          
-          // Se não funcionou, tentar scrollIntoView
-          if (!isAtBottom && messagesEndRef.current) {
-            console.log('📜 [SCROLL] Tentando scrollIntoView...');
-            messagesEndRef.current.scrollIntoView({
-              behavior: 'auto',
-              block: 'end',
-              inline: 'nearest'
-            });
-          }
-        }, 50);
+        console.log('📜 [SCROLL] Scroll inicial executado');
       });
     });
   };
 
-  // Scroll para baixo sempre que mensagens mudarem OU chat ativo mudar
+  // Remover scroll automático - apenas scroll manual via botão
+  // useEffect removido para evitar scroll automático indesejado
+
+  // Scroll inicial apenas quando trocar de chat (primeira vez)
   useEffect(() => {
-    console.log('📜 [EFFECT] useEffect mensagens/chat disparado:', { 
-      activeChat: activeChat?.name || activeChat?.username || activeChat,
-      messagesCount: messages?.length || 0 
-    });
-    
-    // Aguardar 3 ciclos de renderização antes de fazer scroll
-    setTimeout(() => {
-      console.log('📜 [EFFECT] Executando scroll após renderização...');
-      scrollToBottom(true);
-    }, 200);
-  }, [messages, activeChat]);
+    if (activeChat) {
+      console.log('🔄 [CHAT] Novo chat aberto, fazendo scroll inicial...');
+      // Scroll inicial apenas quando muda de chat
+      setTimeout(() => scrollToBottom(true), 300);
+    }
+  }, [activeChat]); // Apenas quando activeChat mudar
 
   // Atualizar timestamp quando usuário foca na janela ou seleciona o chat
   useEffect(() => {
@@ -98,69 +74,7 @@ const ChatArea = ({
       // Marcar como lido (simplificado sem notificationService)
       console.log(`📖 Chat ${conversationId} aberto`);
     }
-  }, [activeChat, chatType, currentUsername]);
-
-  // Detectar se usuário está no final para mostrar/ocultar botão
-  useEffect(() => {
-    const container = document.getElementById('messages-container');
-    if (!container) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const isAtBottom = scrollHeight - scrollTop <= clientHeight + 50; // 50px de margem
-      setShowScrollButton(!isAtBottom);
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    
-    // Verificar posição inicial
-    handleScroll();
-
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [activeChat]);
-
-  // Obter timestamp da última leitura ao carregar o chat (simplificado)
-  useEffect(() => {
-    if (activeChat) {
-      let conversationId;
-      if (chatType === 'group') {
-        conversationId = `group_${activeChat.id}`;
-      } else {
-        const username = activeChat.username || activeChat;
-        conversationId = `private_${username}`;
-      }
-      
-      console.log(`📖 Carregando chat: ${conversationId}`);
-      setLastReadTimestamp(null); // Simplificado
-      
-      // Forçar scroll para baixo quando trocar de chat
-      const scrollAfterChatChange = () => {
-        setTimeout(() => scrollToBottom(true), 100);
-        setTimeout(() => scrollToBottom(true), 300);
-        setTimeout(() => scrollToBottom(true), 600);
-      };
-      
-      scrollAfterChatChange();
-    }
-  }, [activeChat, chatType, currentUsername]);
-
-  // useEffect ESPECÍFICO para scroll ao trocar de chat (independente das mensagens)
-  useEffect(() => {
-    if (activeChat) {
-      console.log('🔄 [CHAT] Chat ativo mudou:', activeChat.name || activeChat.username || activeChat);
-      
-      // Scroll imediato e após delay
-      setTimeout(() => {
-        console.log('🔄 [CHAT] Forçando scroll para chat ativo...');
-        scrollToBottom(true);
-      }, 100);
-      
-      setTimeout(() => {
-        console.log('🔄 [CHAT] Scroll final para chat ativo...');
-        scrollToBottom(true);
-      }, 500);
-    }
-  }, [activeChat]); // Apenas quando activeChat mudar
+  }, [activeChat, chatType, currentUsername, messages]);
 
   const formatTime = (timestamp) => {
     if (!timestamp) return '';
@@ -213,6 +127,35 @@ const ChatArea = ({
 
   const messageGroups = groupMessagesByDate(messages || []);
 
+  // Verificar se o usuário está no final do chat
+  const checkScrollPosition = () => {
+    const container = document.getElementById('messages-container');
+    if (!container) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100; // 100px de tolerância
+    
+    setShowScrollToBottom(!isNearBottom);
+  };
+
+  // Handler para o scroll do usuário
+  const handleScroll = () => {
+    checkScrollPosition();
+  };
+
+  // Função para rolar para baixo quando o botão for clicado
+  const scrollToBottomSmooth = () => {
+    const container = document.getElementById('messages-container');
+    if (!container) return;
+
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: 'smooth'
+    });
+    
+    setShowScrollToBottom(false);
+  };
+
   if (!activeChat) {
     return (
       <div style={{
@@ -251,7 +194,8 @@ const ChatArea = ({
       overflow: 'hidden',
       border: 'none',
       maxWidth: '100%',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      position: 'relative' // Para posicionamento correto do botão
     }}>
       {/* CSS para animação de mensagens novas */}
       <style>
@@ -266,7 +210,7 @@ const ChatArea = ({
           }
           
           #messages-container {
-            scroll-behavior: auto;
+            scroll-behavior: smooth;
           }
           
           @keyframes fadeInGlow {
@@ -294,15 +238,6 @@ const ChatArea = ({
               opacity: 1;
               transform: translateY(0) scale(1.02);
               box-shadow: 0 4px 12px rgba(255, 235, 59, 0.6), 0 0 0 2px #ffc107;
-            }
-          }
-          
-          @keyframes pulse {
-            0%, 100% {
-              box-shadow: 0 4px 12px rgba(255, 235, 59, 0.6), 0 0 0 2px #ffc107;
-            }
-            50% {
-              box-shadow: 0 4px 20px rgba(255, 235, 59, 0.9), 0 0 0 3px #ff9800;
             }
           }
           
@@ -372,25 +307,25 @@ const ChatArea = ({
         style={{
           flex: 1,
           padding: '10px 15px',
-          overflowY: 'auto',
+          paddingRight: '2px',
+          overflowY: 'scroll',
           overflowX: 'hidden',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
           maxWidth: '100%',
+          minHeight: 0,
           boxSizing: 'border-box',
-          position: 'relative'
+          backgroundColor: '#ffffff'
         }}
-        className="hide-scrollbar"
         id="messages-container"
+        onScroll={handleScroll}
       >
         {loading && (!messages || messages.length === 0) ? (
-          <div style={{ textAlign: 'center', padding: '30px', color: '#95a5a6' }}> {/* Padding reduzido */}
-            <div style={{ fontSize: '40px', marginBottom: '10px' }}>💬</div> {/* Tamanho reduzido */}
+          <div style={{ textAlign: 'center', padding: '30px', color: '#95a5a6' }}>
+            <div style={{ fontSize: '40px', marginBottom: '10px' }}>💬</div>
             <p>Carregando mensagens...</p>
           </div>
         ) : (!messages || messages.length === 0) ? (
-          <div style={{ textAlign: 'center', padding: '30px', color: '#95a5a6' }}> {/* Padding reduzido */}
-            <div style={{ fontSize: '40px', marginBottom: '10px' }}>💬</div> {/* Tamanho reduzido */}
+          <div style={{ textAlign: 'center', padding: '30px', color: '#95a5a6' }}>
+            <div style={{ fontSize: '40px', marginBottom: '10px' }}>💬</div>
             <p>
               {chatType === 'group' 
                 ? 'Nenhuma mensagem ainda. Seja o primeiro a conversar!' 
@@ -447,7 +382,7 @@ const ChatArea = ({
                   isVeryRecentMessage,
                   shouldHighlight,
                   messageTime: new Date(message.timestamp).toLocaleTimeString(),
-                  lastRead: lastReadTimestamp ? new Date(lastReadTimestamp).toLocaleTimeString() : 'nunca'
+                  lastRead: 'nunca'
                 });
                 
                 return (
@@ -550,49 +485,6 @@ const ChatArea = ({
         
         {/* Ref para scroll automático */}
         <div ref={messagesEndRef} />
-        
-        {/* Botão flutuante para ir ao final - só aparece quando necessário */}
-        {showScrollButton && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '20px',
-              right: '20px',
-              zIndex: 1000
-            }}
-          >
-            <button
-              onClick={() => scrollToBottom(true)}
-              style={{
-                backgroundColor: '#3498db',
-                color: 'white',
-                border: 'none',
-                borderRadius: '50%',
-                width: '50px',
-                height: '50px',
-                cursor: 'pointer',
-                fontSize: '20px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.3s ease',
-                animation: 'fadeIn 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#2980b9';
-                e.target.style.transform = 'scale(1.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = '#3498db';
-                e.target.style.transform = 'scale(1)';
-              }}
-              title="Ir para a mensagem mais recente"
-            >
-              ⬇️
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Formulário de envio */}
@@ -652,30 +544,53 @@ const ChatArea = ({
       <div style={{ display: 'none' }}>
         <div id="observer-target" ref={messagesEndRef} />
       </div>
+
+      {/* Botão flutuante para voltar ao final */}
+      {showScrollToBottom && (
+        <button
+          onClick={scrollToBottomSmooth}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = '#4fc3f7'; // Azul hover igual ao scroll
+            e.target.style.transform = 'scale(1.1)';
+            e.target.style.boxShadow = '0 8px 20px rgba(79, 195, 247, 0.5)';
+            e.target.style.opacity = '1'; // Opacidade total no hover
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = '#87ceeb'; // Volta para azul claro
+            e.target.style.transform = 'scale(1)';
+            e.target.style.boxShadow = '0 6px 16px rgba(135, 206, 235, 0.4)';
+            e.target.style.opacity = '0.7'; // Volta para 70% de transparência
+          }}
+          style={{
+            position: 'absolute',
+            bottom: '90px',
+            left: '50%',
+            marginLeft: '-27.5px', // Metade da largura (55px / 2) para centralizar
+            width: '55px',
+            height: '55px',
+            borderRadius: '50%',
+            backgroundColor: '#87ceeb', // Mesma cor azul claro da barra de scroll
+            color: 'white',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '22px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 6px 16px rgba(135, 206, 235, 0.4)', // Sombra azul suave
+            zIndex: 1000,
+            transition: 'all 0.3s ease',
+            animation: 'fadeInUp 0.3s ease-out',
+            transform: 'scale(1)', // Garantir estado inicial
+            opacity: '0.7' // 70% de transparência
+          }}
+          title="Ir para o final da conversa"
+        >
+          ⬇️
+        </button>
+      )}
       
-      <script>
-        {`
-          const target = document.getElementById('observer-target');
-          const config = { childList: true, subtree: true };
-          
-          const callback = function(mutationsList, observer) {
-            for (let mutation of mutationsList) {
-              if (mutation.type === 'childList') {
-                // Novo conteúdo adicionado, forçar scroll
-                setTimeout(() => {
-                  const container = document.getElementById('messages-container');
-                  if (container) {
-                    container.scrollTop = container.scrollHeight;
-                  }
-                }, 100);
-              }
-            }
-          };
-          
-          const observer = new MutationObserver(callback);
-          observer.observe(target, config);
-        `}
-      </script>
+      {/* Script removido para evitar scroll automático indesejado */}
     </div>
   );
 };

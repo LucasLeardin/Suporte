@@ -13,13 +13,6 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
       roles: ['admin'] // Apenas admins podem ver
     },
     {
-      id: 'messages',
-      icon: '📝',
-      label: 'Mensagens',
-      description: 'Histórico de conversas',
-      roles: ['admin', 'user'] // Todos podem ver
-    },
-    {
       id: 'chat',
       icon: '�',
       label: 'Chat Interno',
@@ -39,6 +32,13 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
       label: 'Usuários',
       description: 'Gerenciar usuários',
       roles: ['admin'] // Apenas admins podem ver
+    },
+    {
+      id: 'jogo-da-velha',
+      icon: '🎮',
+      label: 'Jogo da Velha',
+      description: 'Jogue contra o computador',
+      roles: ['admin', 'user'] // Todos podem ver
     }
   ];
 

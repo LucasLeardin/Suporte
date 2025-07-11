@@ -60,20 +60,19 @@ export const useChat = () => {
     try {
       setLoading(true);
       let data;
-      let conversationId;
       
       console.log('Buscando mensagens para:', activeChat, 'tipo:', chatType);
       
       if (chatType === 'group') {
         console.log('Buscando mensagens do grupo:', activeChat.id);
         data = await groupService.fetchGroupMessages(activeChat.id);
-        conversationId = `group_${activeChat.id}`;
+        // conversationId = `group_${activeChat.id}`;
       } else {
         // Para conversas privadas, activeChat pode ser um objeto com username ou uma string
         const targetUsername = activeChat.username || activeChat;
         console.log('Buscando mensagens privadas para:', targetUsername);
         data = await privatechatService.fetchPrivateMessages(targetUsername);
-        conversationId = `private_${targetUsername}`;
+        // conversationId = `private_${targetUsername}`;
       }
       
       console.log('Mensagens recebidas:', data);
@@ -92,23 +91,14 @@ export const useChat = () => {
       
       setMessages(validMessages);
       
-      // Scroll após definir mensagens se há mensagens
-      if (validMessages.length > 0) {
-        setTimeout(() => {
-          const container = document.getElementById('messages-container');
-          if (container && container.scrollHeight > container.clientHeight) {
-            container.scrollTop = container.scrollHeight;
-            console.log('📜 [HOOK] Scroll pós-carregamento executado');
-          }
-        }, 400);
-      }
+      // Scroll automático removido - controlado pelo usuário via botão
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error);
       setMessages([]); // Definir como array vazio em caso de erro
     } finally {
       setLoading(false);
     }
-  }, [activeChat, chatType, currentUser.username]); // Remover messages.length da dependência
+  }, [activeChat, chatType, messages.length]); // Remover currentUser.username da dependência
 
   // Buscar membros de um grupo
   const fetchGroupMembers = async (group) => {
@@ -146,14 +136,7 @@ export const useChat = () => {
       setMessages(prevMessages => [...(prevMessages || []), data.data]);
       setNewMessage('');
       
-      // Scroll para baixo após enviar mensagem
-      setTimeout(() => {
-        const container = document.getElementById('messages-container');
-        if (container) {
-          container.scrollTop = container.scrollHeight;
-          console.log('📜 Scroll após enviar mensagem');
-        }
-      }, 100);
+      // Scroll automático removido - usuário controla via botão
       
       // Atualizar lista de conversas se for chat privado
       if (chatType === 'private') {
@@ -268,14 +251,7 @@ export const useChat = () => {
     if (activeChat) {
       fetchMessages();
       
-      // Forçar scroll para baixo após carregar mensagens
-      setTimeout(() => {
-        const container = document.getElementById('messages-container');
-        if (container && container.scrollHeight > container.clientHeight) {
-          container.scrollTop = container.scrollHeight;
-          console.log('📜 [HOOK] Scroll forçado final após carregar mensagens');
-        }
-      }, 600);
+      // Scroll automático removido - usuário controla via botão
       
       // Atualizar mensagens a cada 5 segundos
       const interval = setInterval(() => {

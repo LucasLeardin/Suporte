@@ -1,5 +1,16 @@
 {
+  "name": "suporte-server",
+  "version": "1.0.0",
+  "main": "chatbot.js",
+  "scripts": {
+    "start": "node chatbot.js",
+    "dev": "nodemon chatbot.js"
+  },
   "dependencies": {
-    "multer": "^2.0.1"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "whatsapp-web.js": "^1.23.0",
+    "multer": "^2.0.1",
+    "socket.io": "^4.7.5"
   }
 }

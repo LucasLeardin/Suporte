@@ -1,10 +1,13 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-const Sidebar = ({ activeTab, onTabChange, currentUser, onLogout }) => {
+const Sidebar = ({ currentUser, onLogout }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const menuItems = [
     { id: 'whatsapp', label: 'WhatsApp', icon: '💬' },
+    { id: 'chat', label: 'Chat de Grupos', icon: '🗨️' },
     { id: 'messages', label: 'Mensagens WhatsApp', icon: '📱' },
-    { id: 'chat', label: 'Chat Interno', icon: '🗨️' },
     { id: 'chamados', label: 'Chamados', icon: '🎫' },
     { id: 'ponto', label: 'Ponto', icon: '⏰' },
     { id: 'settings', label: 'Configurações', icon: '⚙️' },
@@ -17,8 +20,35 @@ const Sidebar = ({ activeTab, onTabChange, currentUser, onLogout }) => {
     }
   };
 
+
   const handleTabClick = (tabId) => {
-    onTabChange(tabId);
+    let path = '/';
+    switch (tabId) {
+      case 'whatsapp':
+        path = '/whatsapp';
+        break;
+      case 'chat':
+        path = '/chat';
+        break;
+      case 'messages':
+        path = '/mensagens_whatsapp';
+        break;
+      case 'chamados':
+        path = '/chamados';
+        break;
+      case 'ponto':
+        path = '/ponto';
+        break;
+      case 'settings':
+        path = '/configuracoes';
+        break;
+      case 'users':
+        path = '/usuarios';
+        break;
+      default:
+        path = '/';
+    }
+    navigate(path);
   };
 
   return (
@@ -47,36 +77,64 @@ const Sidebar = ({ activeTab, onTabChange, currentUser, onLogout }) => {
 
       {/* Menu Items */}
       <div style={{ flex: 1, padding: '20px 0' }}>
-        {menuItems.map(item => (
-          <div
-            key={item.id}
-            onClick={() => handleTabClick(item.id)}
-            style={{
-              padding: '12px 20px',
-              cursor: 'pointer',
-              backgroundColor: activeTab === item.id ? '#3498db' : 'transparent',
-              borderLeft: activeTab === item.id ? '4px solid #2980b9' : '4px solid transparent',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              transition: 'all 0.3s ease',
-              fontSize: '14px'
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== item.id) {
-                e.target.style.backgroundColor = '#34495e';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== item.id) {
-                e.target.style.backgroundColor = 'transparent';
-              }
-            }}
-          >
-            <span style={{ fontSize: '18px' }}>{item.icon}</span>
-            <span>{item.label}</span>
-          </div>
-        ))}
+        {menuItems.map(item => {
+          // Define a rota base para cada item
+          let route = '/';
+          switch (item.id) {
+            case 'whatsapp':
+              route = '/whatsapp';
+              break;
+            case 'messages':
+              route = '/mensagens_whatsapp';
+              break;
+            case 'chamados':
+              route = '/chamados';
+              break;
+            case 'ponto':
+              route = '/ponto';
+              break;
+            case 'settings':
+              route = '/configuracoes';
+              break;
+            case 'users':
+              route = '/usuarios';
+              break;
+            default:
+              route = '/';
+          }
+          // Considera ativo se o pathname começa com a rota base
+          const isActive = location.pathname === route || location.pathname.startsWith(route + '/');
+          return (
+            <div
+              key={item.id}
+              onClick={() => handleTabClick(item.id)}
+              style={{
+                padding: '12px 20px',
+                cursor: 'pointer',
+                backgroundColor: isActive ? '#3498db' : 'transparent',
+                borderLeft: isActive ? '4px solid #2980b9' : '4px solid transparent',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                transition: 'all 0.3s ease',
+                fontSize: '14px'
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.target.style.backgroundColor = '#34495e';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.target.style.backgroundColor = 'transparent';
+                }
+              }}
+            >
+              <span style={{ fontSize: '18px' }}>{item.icon}</span>
+              <span>{item.label}</span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Footer */}

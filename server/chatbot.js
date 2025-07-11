@@ -878,6 +878,9 @@ app.post('/conversations/:contactId/send', authenticateToken, async (req, res) =
     }
 });
 
+// Rota para servir arquivos de upload
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // ========== ROTAS DOS GRUPOS ==========
 
 // Listar todos os grupos disponíveis para o usuário
@@ -1901,16 +1904,119 @@ const upload = multer({
         fileSize: 10 * 1024 * 1024 // 10MB
     },
     fileFilter: function (req, file, cb) {
-        // Permitir apenas certos tipos de arquivo
-        const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar/;
+        // Permitir imagens, áudios e documentos
+        const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar|mp3|wav|ogg|webm|m4a/;
         const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
+        const mimetype = allowedTypes.test(file.mimetype) || 
+                        file.mimetype.startsWith('image/') || 
+                        file.mimetype.startsWith('audio/');
         
         if (mimetype && extname) {
             return cb(null, true);
         } else {
             cb(new Error('Tipo de arquivo não permitido'));
         }
+    }
+});
+
+// Rota para enviar imagens
+app.post('/conversations/:id/send-image', authenticateToken, upload.single('image'), async (req, res) => {
+    try {
+        const conversationId = req.params.id;
+        const file = req.file;
+        
+        if (!file) {
+            return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+        }
+
+        const conversation = conversations.get(conversationId);
+        if (!conversation) {
+            return res.status(404).json({ error: 'Conversa não encontrada' });
+        }
+
+        // Criar objeto de mídia
+        const media = MessageMedia.fromFilePath(file.path);
+
+        // Enviar através do WhatsApp
+        const message = await client.sendMessage(conversationId, media, {
+            caption: req.body.caption || ''
+        });
+
+        // Criar entrada na conversa
+        const messageEntry = {
+            id: message.id._serialized,
+            from: 'me',
+            to: conversationId,
+            body: file.filename,
+            type: 'image',
+            mediaUrl: `/uploads/${file.filename}`,
+            caption: req.body.caption || '',
+            timestamp: new Date().toISOString(),
+            contact: conversation.name
+        };
+
+        // Adicionar à lista de mensagens
+        allMessages.push(messageEntry);
+
+        // Atualizar conversa
+        conversation.lastMessage = '📷 Imagem';
+        conversation.timestamp = new Date().toISOString();
+
+        console.log(`Imagem enviada para ${conversationId}`);
+        res.json({ success: true, message: messageEntry });
+
+    } catch (error) {
+        console.error('Erro ao enviar imagem:', error);
+        res.status(500).json({ error: 'Erro ao enviar imagem: ' + error.message });
+    }
+});
+
+// Rota para enviar áudios
+app.post('/conversations/:id/send-audio', authenticateToken, upload.single('audio'), async (req, res) => {
+    try {
+        const conversationId = req.params.id;
+        const file = req.file;
+        
+        if (!file) {
+            return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+        }
+
+        const conversation = conversations.get(conversationId);
+        if (!conversation) {
+            return res.status(404).json({ error: 'Conversa não encontrada' });
+        }
+
+        // Criar objeto de mídia
+        const media = MessageMedia.fromFilePath(file.path);
+
+        // Enviar através do WhatsApp
+        const message = await client.sendMessage(conversationId, media);
+
+        // Criar entrada na conversa
+        const messageEntry = {
+            id: message.id._serialized,
+            from: 'me',
+            to: conversationId,
+            body: file.filename,
+            type: 'audio',
+            mediaUrl: `/uploads/${file.filename}`,
+            timestamp: new Date().toISOString(),
+            contact: conversation.name
+        };
+
+        // Adicionar à lista de mensagens
+        allMessages.push(messageEntry);
+
+        // Atualizar conversa
+        conversation.lastMessage = '🎵 Áudio';
+        conversation.timestamp = new Date().toISOString();
+
+        console.log(`Áudio enviado para ${conversationId}`);
+        res.json({ success: true, message: messageEntry });
+
+    } catch (error) {
+        console.error('Erro ao enviar áudio:', error);
+        res.status(500).json({ error: 'Erro ao enviar áudio: ' + error.message });
     }
 });
 

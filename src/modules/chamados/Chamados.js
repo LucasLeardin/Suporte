@@ -41,9 +41,9 @@ const Chamados = () => {
   const loadInitialData = async () => {
     try {
       const [userResponse, departmentsResponse, usersResponse] = await Promise.all([
-        authenticatedFetch('http://localhost:8000/auth/verify'),
-        authenticatedFetch('http://localhost:8000/departments'),
-        authenticatedFetch('http://localhost:8000/users')
+        authenticatedFetch('/api/verify'),
+        authenticatedFetch('/api/departments'),
+        authenticatedFetch('/api/users')
       ]);
 
       if (userResponse.ok) {

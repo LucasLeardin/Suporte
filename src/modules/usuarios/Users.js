@@ -73,7 +73,7 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await authenticatedFetch('http://localhost:8000/users');
+      const response = await authenticatedFetch('/api/users');
       const data = await response.json();
       
       if (response.ok) {
@@ -97,7 +97,7 @@ const Users = () => {
     }
 
     try {
-      const response = await authenticatedFetch('http://localhost:8000/users', {
+      const response = await authenticatedFetch('/api/users', {
         method: 'POST',
         body: JSON.stringify(newUser)
       });
@@ -125,7 +125,7 @@ const Users = () => {
     }
 
     try {
-      const response = await authenticatedFetch(`http://localhost:8000/users/${userId}`, {
+      const response = await authenticatedFetch('/api/users', {
         method: 'DELETE'
       });
 
@@ -150,7 +150,7 @@ const Users = () => {
     }
 
     try {
-      const response = await authenticatedFetch(`http://localhost:8000/users/${editingUser.id}`, {
+      const response = await authenticatedFetch('/api/users', {
         method: 'PUT',
         body: JSON.stringify({
           username: editingUser.username,

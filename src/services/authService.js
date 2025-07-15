@@ -37,7 +37,7 @@ export const logout = () => {
   localStorage.removeItem('authToken');
   localStorage.removeItem('username');
   localStorage.removeItem('userRole');
-  window.location.reload();
+  window.location.href = '/'; // ou '/login' se sua rota de login for diferente
 };
 
 // Obter dados do usuário atual

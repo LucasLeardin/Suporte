@@ -1,1 +1,1 @@
-export { default } from '../../QrCodeDisplay';
+export { default } from './QrCodeDisplay';

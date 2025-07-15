@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Layout/Sidebar';
 import Whatsapp from './modules/whatsapp';
-import Chat from './modules/chat/Chat';
+import Chat from './modules/chat/UnifiedChat';
 import MensagensWhatsapp from './modules/mensagens_whatsapp';
 import Chamados from './modules/chamados';
 import Ponto from './modules/ponto';
@@ -12,7 +12,7 @@ import Usuarios from './modules/usuarios';
 const AppRouter = ({ currentUser, onLogout }) => (
   <Router>
     <div style={{ display: 'flex', height: '100vh' }}>
-      <Sidebar currentUser={currentUser} />
+      <Sidebar currentUser={currentUser} onLogout={onLogout || (() => {})} />
       <div style={{ flex: 1, background: '#ecf0f1', height: '100vh', overflow: 'auto' }}>
         <Routes>
           <Route path="/" element={<Navigate to="/whatsapp" />} />

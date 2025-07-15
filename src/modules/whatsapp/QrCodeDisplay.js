@@ -59,103 +59,60 @@ const QrCodeDisplay = () => {
         margin: '20px 0',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
         gap: '10px'
       };
     } else {
       return {
         padding: '15px',
         borderRadius: '10px',
-        backgroundColor: '#f8d7da',
-        border: '1px solid #f5c6cb',
-        color: '#721c24',
+        backgroundColor: '#fff3cd',
+        border: '1px solid #ffeeba',
+        color: '#856404',
         margin: '20px 0',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
         gap: '10px'
       };
     }
   };
 
   return (
-    <div 
-      style={{ 
-        textAlign: 'center', 
-        padding: '20px',
-        height: '100%',
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontFamily: 'Arial, sans-serif',
-        boxSizing: 'border-box',
-        margin: 0
-      }}>
-      <h1 style={{ color: '#333', marginBottom: '30px' }}>
-        WhatsApp Chatbot
-      </h1>
-      
-      {/* Status da Conexão */}
+    <div style={{ maxWidth: '500px', margin: '40px auto', background: 'white', borderRadius: '15px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', padding: '40px 30px' }}>
+      <h2 style={{ textAlign: 'center', color: '#2c3e50', marginBottom: '30px' }}>WhatsApp Chatbot</h2>
+
       <div style={getStatusStyle()}>
-        <div style={{
-          width: '12px',
-          height: '12px',
-          borderRadius: '50%',
-          backgroundColor: isConnected ? '#28a745' : '#dc3545'
-        }}></div>
-        <span style={{ fontWeight: 'bold' }}>
-          {isConnected ? '✅ Conectado' : '⏳ Aguardando conexão'}
-        </span>
-        <span>- {status}</span>
+        {isConnected ? '✅' : '⌛'}
+        <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{status}</span>
       </div>
 
-      {/* QR Code ou status de conexão */}
       {isConnected ? (
-        <div style={{
-          padding: '30px',
-          backgroundColor: '#d4edda',
-          borderRadius: '15px',
-          border: '2px solid #28a745',
-          textAlign: 'center'
-        }}>
-          <h2 style={{ color: '#28a745', margin: '0 0 20px 0' }}>
-            🎉 WhatsApp Conectado com Sucesso!
-          </h2>
-          <p style={{ color: '#155724', fontSize: '18px', marginBottom: '15px' }}>
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '15px' }}>🎉 WhatsApp Conectado com Sucesso!</div>
+          <div style={{ color: '#27ae60', fontWeight: 'bold', fontSize: '18px', marginBottom: '10px' }}>
             Seu WhatsApp está conectado e funcionando corretamente.
-          </p>
-          <p style={{ color: '#6c757d', fontSize: '16px' }}>
-            Para configurar mensagens automáticas e comandos personalizados, acesse a seção <strong>Configurações</strong> no menu lateral.
-          </p>
+          </div>
+          <div style={{ fontSize: '14px', color: '#7f8c8d' }}>
+            Você pode fechar esta tela ou navegar pelo sistema normalmente.
+          </div>
         </div>
       ) : (
-        <>
-          <h2 style={{ color: '#666', marginBottom: '20px' }}>
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '15px' }}>
             Escaneie o QR Code para conectar o WhatsApp
-          </h2>
+          </div>
           {qrCode ? (
-            <div style={{
-              padding: '20px',
-              backgroundColor: 'white',
-              borderRadius: '15px',
-              border: '2px solid #007bff',
-              display: 'inline-block'
-            }}>
-              <QRCodeCanvas value={qrCode} size={256} />
-              <p style={{ 
-                marginTop: '15px', 
-                color: '#666',
-                fontSize: '14px' 
-              }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+              <QRCodeCanvas value={qrCode} size={220} />
+              <div style={{ fontSize: '14px', color: '#7f8c8d' }}>
                 Abra o WhatsApp → Menu → WhatsApp Web → Escanear código
-              </p>
+              </div>
             </div>
           ) : (
-            <p>Carregando QR Code...</p>
+            <div style={{ color: '#e67e22', fontWeight: 'bold', fontSize: '16px' }}>
+              Carregando QR Code...
+            </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

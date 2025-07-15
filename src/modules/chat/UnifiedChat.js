@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { authenticatedFetch } from './utils/auth';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { authenticatedFetch } from '../../utils/auth';
 
 const UnifiedChat = () => {
   const [activeChat, setActiveChat] = useState(null);
@@ -10,9 +11,9 @@ const UnifiedChat = () => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  // Removido showCreateGroup, modal de criação agora é unificado
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createMode, setCreateMode] = useState('group'); // 'group' ou 'private'
+  const [createMode, setCreateMode] = useState(null); // null, 'group' ou 'private'
   const [showGroupInfo, setShowGroupInfo] = useState(false);
   const [selectedGroupForInfo, setSelectedGroupForInfo] = useState(null);
   const [groupMembers, setGroupMembers] = useState([]);
@@ -38,7 +39,7 @@ const UnifiedChat = () => {
   };
 
   // Carregar grupos disponíveis
-  const fetchGroups = async () => {
+  const fetchGroups = useCallback(async () => {
     try {
       const response = await authenticatedFetch('http://localhost:8000/groups');
       const data = await response.json();
@@ -57,7 +58,7 @@ const UnifiedChat = () => {
     } catch (error) {
       console.error('Erro ao carregar grupos:', error);
     }
-  };
+  }, [activeChat, setActiveChat, setChatType, setGroups]);
 
   // Carregar conversas privadas
   const fetchConversations = async () => {
@@ -76,21 +77,17 @@ const UnifiedChat = () => {
   };
 
   // Carregar mensagens do chat ativo
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     if (!activeChat) return;
-    
     try {
       setLoading(true);
       let response;
-      
       if (chatType === 'group') {
         response = await authenticatedFetch(`http://localhost:8000/groups/${activeChat.id}/messages`);
       } else {
         response = await authenticatedFetch(`http://localhost:8000/private-chat/messages/${activeChat.username}`);
       }
-      
       const data = await response.json();
-      
       if (response.ok) {
         setMessages(data);
       } else {
@@ -101,7 +98,7 @@ const UnifiedChat = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeChat, chatType, setLoading, setMessages]);
 
   // Enviar mensagem
   const sendMessage = async (e) => {
@@ -168,7 +165,7 @@ const UnifiedChat = () => {
     fetchGroups();
     fetchConversations();
     fetchAvailableUsers();
-  }, []);
+  }, [fetchGroups]);
 
   // Carregar mensagens quando o chat ativo mudar
   useEffect(() => {
@@ -180,7 +177,7 @@ const UnifiedChat = () => {
       
       return () => clearInterval(interval);
     }
-  }, [activeChat, chatType]);
+  }, [activeChat, chatType, fetchMessages]);
 
   // Buscar membros do grupo ativo para mostrar contador
   useEffect(() => {
@@ -277,7 +274,7 @@ const UnifiedChat = () => {
         }
         
         setNewGroup({ name: '', description: '', type: 'custom', department: '', selectedMembers: [] });
-        setShowCreateGroup(false);
+        // Removido setShowCreateGroup, modal de criação agora é unificado
       } else {
         alert('Erro ao criar grupo: ' + data.error);
       }
@@ -459,7 +456,11 @@ const UnifiedChat = () => {
         }}>
           <h3 style={{ margin: 0, color: '#2c3e50' }}>Chat Interno</h3>
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => {
+              setCreateMode(null);
+              setShowCreateModal(true);
+              setNewGroup({ name: '', description: '', type: 'custom', department: '', selectedMembers: [] });
+            }}
             style={{
               backgroundColor: '#27ae60',
               color: 'white',
@@ -470,7 +471,7 @@ const UnifiedChat = () => {
               fontSize: '12px'
             }}
           >
-            + Novo
+            + Nova
           </button>
         </div>
 
@@ -1129,50 +1130,53 @@ const UnifiedChat = () => {
             maxWidth: '90vw'
           }}>
             <h3 style={{ color: '#2c3e50', marginBottom: '20px' }}>
-              O que você deseja fazer?
+              {createMode === null && 'O que você deseja fazer?'}
+              {createMode === 'group' && 'Criar Novo Grupo'}
+              {createMode === 'private' && 'Iniciar Conversa Privada'}
             </h3>
 
             {/* Seleção do tipo */}
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  onClick={() => setCreateMode('group')}
-                  style={{
-                    flex: 1,
-                    padding: '15px',
-                    border: createMode === 'group' ? '2px solid #3498db' : '1px solid #ddd',
-                    borderRadius: '8px',
-                    backgroundColor: createMode === 'group' ? '#e3f2fd' : 'white',
-                    cursor: 'pointer',
-                    textAlign: 'center'
-                  }}
-                >
-                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>👥</div>
-                  <div style={{ fontWeight: 'bold', color: '#2c3e50' }}>Criar Grupo</div>
-                  <div style={{ fontSize: '12px', color: '#7f8c8d' }}>Conversa em grupo para equipe</div>
-                </button>
-                
-                <button
-                  onClick={() => setCreateMode('private')}
-                  style={{
-                    flex: 1,
-                    padding: '15px',
-                    border: createMode === 'private' ? '2px solid #27ae60' : '1px solid #ddd',
-                    borderRadius: '8px',
-                    backgroundColor: createMode === 'private' ? '#e8f5e8' : 'white',
-                    cursor: 'pointer',
-                    textAlign: 'center'
-                  }}
-                >
-                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>👤</div>
-                  <div style={{ fontWeight: 'bold', color: '#2c3e50' }}>Conversa Privada</div>
-                  <div style={{ fontSize: '12px', color: '#7f8c8d' }}>Chat 1-a-1 com usuário</div>
-                </button>
+            {createMode === null && (
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => setCreateMode('group')}
+                    style={{
+                      flex: 1,
+                      padding: '15px',
+                      border: '2px solid #3498db',
+                      borderRadius: '8px',
+                      backgroundColor: '#e3f2fd',
+                      cursor: 'pointer',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>👥</div>
+                    <div style={{ fontWeight: 'bold', color: '#2c3e50' }}>Criar Grupo</div>
+                    <div style={{ fontSize: '12px', color: '#7f8c8d' }}>Conversa em grupo para equipe</div>
+                  </button>
+                  <button
+                    onClick={() => setCreateMode('private')}
+                    style={{
+                      flex: 1,
+                      padding: '15px',
+                      border: '2px solid #27ae60',
+                      borderRadius: '8px',
+                      backgroundColor: '#e8f5e8',
+                      cursor: 'pointer',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>👤</div>
+                    <div style={{ fontWeight: 'bold', color: '#2c3e50' }}>Conversa Privada</div>
+                    <div style={{ fontSize: '12px', color: '#7f8c8d' }}>Chat 1-a-1 com usuário</div>
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Formulário baseado no modo selecionado */}
-            {createMode === 'group' ? (
+            {createMode === 'group' && (
               <>
                 <div style={{ marginBottom: '15px' }}>
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -1253,7 +1257,8 @@ const UnifiedChat = () => {
                   </div>
                 )}
               </>
-            ) : (
+            )}
+            {createMode === 'private' && (
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
                   Selecionar Usuário:
@@ -1263,6 +1268,7 @@ const UnifiedChat = () => {
                     if (e.target.value) {
                       startPrivateChat(e.target.value);
                       setShowCreateModal(false);
+                      setCreateMode(null);
                     }
                   }}
                   style={{
@@ -1292,8 +1298,11 @@ const UnifiedChat = () => {
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
               <button
                 onClick={() => {
-                  setShowCreateModal(false);
-                  setCreateMode('group');
+                  if (createMode === null) {
+                    setShowCreateModal(false);
+                  } else {
+                    setCreateMode(null);
+                  }
                   setNewGroup({ name: '', description: '', type: 'custom', department: '', selectedMembers: [] });
                 }}
                 style={{
@@ -1305,15 +1314,14 @@ const UnifiedChat = () => {
                   cursor: 'pointer'
                 }}
               >
-                Cancelar
+                {createMode === null ? 'Cancelar' : 'Voltar'}
               </button>
-              
               {createMode === 'group' && (
                 <button
                   onClick={() => {
                     createGroup();
                     setShowCreateModal(false);
-                    setCreateMode('group');
+                    setCreateMode(null);
                   }}
                   disabled={!newGroup.name.trim()}
                   style={{

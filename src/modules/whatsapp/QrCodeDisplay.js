@@ -10,7 +10,7 @@ const QrCodeDisplay = () => {
     // Busca o QR Code do backend
     const fetchQrCode = async () => {
       try {
-        const response = await fetch('http://localhost:8000/qr');
+        const response = await fetch('/api/qr');
         const data = await response.json();
         setQrCode(data.qr);
       } catch (error) {
@@ -22,7 +22,7 @@ const QrCodeDisplay = () => {
     // Verifica o status da conexão
     const checkStatus = async () => {
       try {
-        const response = await fetch('http://localhost:8000/status');
+        const response = await fetch('/api/status');
         const data = await response.json();
         setIsConnected(data.ready);
         setStatus(data.message);

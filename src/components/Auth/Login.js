@@ -15,7 +15,7 @@ const Login = ({ onLogin }) => {
     console.log('Tentando fazer login com:', { username, password: '***' });
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch('/php-api/login.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

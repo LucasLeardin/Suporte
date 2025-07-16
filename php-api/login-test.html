@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste de Login API</title>
+</head>
+<body>
+    <h2>Teste de Login (API)</h2>
+    <form id="loginForm">
+        <label>Usuário: <input type="text" id="username" required></label><br><br>
+        <label>Senha: <input type="password" id="password" required></label><br><br>
+        <button type="submit">Entrar</button>
+    </form>
+    <pre id="result"></pre>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const response = await fetch('login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        });
+    </script>
+</body>
+</html>
